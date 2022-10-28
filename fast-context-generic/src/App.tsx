@@ -19,10 +19,10 @@ const TextInput = ({ value }: { value: "first" | "last" }) => {
 };
 
 const Display = ({ value }: { value: "first" | "last" }) => {
-  const [fieldValue] = useStore((store) => store[value]);
+  const [fieldValue] = useStore();
   return (
     <div className="value">
-      {value}: {fieldValue}
+      {value}: {fieldValue[value]}
     </div>
   );
 };

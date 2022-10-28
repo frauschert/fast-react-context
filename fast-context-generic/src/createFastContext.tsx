@@ -3,7 +3,8 @@ import React, {
   createContext,
   useContext,
   useCallback,
-  useSyncExternalStore,
+  useState,
+  useEffect,
 } from "react";
 
 export default function createFastContext<Store>(initialState: Store) {
@@ -47,21 +48,23 @@ export default function createFastContext<Store>(initialState: Store) {
     );
   }
 
+  function useStore(): [Store, (value: Partial<Store>) => void];
+  function useStore<SelectorOutput>(selector: (store: Store) => SelectorOutput): [SelectorOutput, (value: Partial<Store>) => void];
   function useStore<SelectorOutput>(
-    selector: (store: Store) => SelectorOutput
-  ): [SelectorOutput, (value: Partial<Store>) => void] {
+    selector?: (store: Store) => SelectorOutput
+  ) {
     const store = useContext(StoreContext);
     if (!store) {
       throw new Error("Store not found");
     }
 
-    const state = useSyncExternalStore(
-      store.subscribe,
-      () => selector(store.get()),
-      () => selector(initialState),
-    );
+    const [state, setState] = useState(() => selector ? selector(initialState) : initialState);
 
-    return [state, store.set];
+    useEffect(() => {
+      return store.subscribe(() => setState(selector ? selector(store.get()) : store.get() ));
+    })
+
+    return [state, store.set] as const;
   }
 
   return {

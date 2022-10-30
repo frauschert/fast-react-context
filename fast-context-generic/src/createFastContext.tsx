@@ -48,6 +48,22 @@ export default function createFastContext<Store>(initialState: Store) {
     );
   }
 
+  function Consumer({ children }: { children: (store: UseStoreDataReturnType) => React.ReactNode }) {
+    return <StoreContext.Consumer>{(store) => store && children(store)}</StoreContext.Consumer>
+  }
+
+  function withStore<TProps, TSelectedProps extends keyof TProps>(Component: React.JSXElementConstructor<TProps>): (props: Omit<TProps, TSelectedProps>) => JSX.Element
+  function withStore<TProps, TSelectedProps extends keyof TProps>(Component: React.JSXElementConstructor<TProps>, selector: (store: Store) => Pick<TProps, TSelectedProps>): (props: Omit<TProps, TSelectedProps>) => JSX.Element
+  function withStore<TProps, TSelectedProps extends keyof TProps>(Component: React.JSXElementConstructor<TProps>, selector?: (store: Store) => Pick<TProps, TSelectedProps>): (props: Omit<TProps, TSelectedProps>) => JSX.Element {
+    return selector ? (props: Omit<TProps, TSelectedProps>) => {
+      const store = useStore(selector);
+      return <Component {...(props as TProps)} {...store}  />
+    } : (props: Omit<TProps, TSelectedProps>) => {
+      const store = useStore();
+      return <Component {...(props as TProps)} {...store}  />
+    }
+  }
+
   function useStore(): [Store, (value: Partial<Store>) => void];
   function useStore<SelectorOutput>(selector: (store: Store) => SelectorOutput): [SelectorOutput, (value: Partial<Store>) => void];
   function useStore<SelectorOutput>(
@@ -69,6 +85,8 @@ export default function createFastContext<Store>(initialState: Store) {
 
   return {
     Provider,
+    Consumer,
+    withStore,
     useStore,
   };
 }

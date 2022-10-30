@@ -1,6 +1,6 @@
 import createFastContext from "./createFastContext";
 
-const { Provider, useStore } = createFastContext({
+const { Provider, useStore, withStore, Consumer } = createFastContext({
   first: "",
   last: "",
 });
@@ -19,10 +19,10 @@ const TextInput = ({ value }: { value: "first" | "last" }) => {
 };
 
 const Display = ({ value }: { value: "first" | "last" }) => {
-  const [fieldValue] = useStore();
+  const [fieldValue] = useStore((store) => store[value]);
   return (
     <div className="value">
-      {value}: {fieldValue[value]}
+      {value}: {fieldValue}
     </div>
   );
 };
